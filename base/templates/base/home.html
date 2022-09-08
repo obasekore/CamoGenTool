@@ -1,0 +1,98 @@
+{% extends 'main.html' %} {% block content %}
+<section class="position-relative py-4 py-xl-5">
+  <div class="container position-relative">
+    <div class="row">
+      <div class="col">
+        {%if request.method == "POST"%}
+        <div>
+          <canvas id="myChart"></canvas>
+        </div>
+        <hr />
+        {%endif%}
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div>
+          <form
+            class="p-3 p-xl-4"
+            method="POST"
+            action=""
+            enctype="multipart/form-data"
+          >
+            {% csrf_token %}
+            <h4>Camouflage Generating Tool</h4>
+            <p class="text-muted">
+              This software uses machine learning to extract from image and
+              generates camouflage pattern with the colours.
+            </p>
+            <div class="mb-3">
+              <label class="form-label" for="no_colour"
+                >Number of Colours to Extract</label
+              ><input
+                class="form-control"
+                type="number"
+                name="no_colour"
+                value="5"
+                min="1"
+                max="10"
+                step="1"
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="bgImg">Select Source Image</label
+              ><input
+                class="form-control"
+                type="file"
+                name="bgImg"
+                accept="image/*"
+              />
+            </div>
+            <div class="mb-3"></div>
+            <div class="mb-3">
+              <button class="btn btn-primary" type="submit">Analyze</button>
+            </div>
+          </form>
+          {%if request.method == "POST"%}
+          <hr />
+          <img
+            class="img-fluid"
+            src="data:image/png;base64, {{img}}"
+            width="300"
+          />
+          {%endif%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<footer class="text-center bg-dark">
+  <div class="container text-white py-4 py-lg-5">
+    <p class="text-muted mb-0">Copyright © 2022 Digital-Fashion Lab@KNU</p>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+{%if request.method == "POST"%}
+<script>
+
+  const ctx = document.getElementById('myChart');
+
+  const data = {
+    labels: {{labels}},
+    datasets: [{
+      label: 'Area occupied',
+      data: {{sizes}},
+      backgroundColor: [
+      {% for Color in Colors %}
+      "rgb{{Color}}",
+      {% endfor %}
+      ],
+      hoverOffset: 4
+    }]
+  };
+  const config = {
+    type: 'pie',
+    data: data,
+  };
+  const myChart = new Chart(ctx, config);
+</script>
+{%endif%} {% endblock content %}
