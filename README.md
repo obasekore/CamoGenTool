@@ -7,6 +7,7 @@ This tool uses ML to extract colours in image and generate camouflage pattern wi
 - Django
 - sqlite >= 3.9.0
 - python >= 3.6
+- Blender >= 3.2
 ### Installation
 - git clone 
 - cd CamoGenTool
