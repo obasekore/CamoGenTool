@@ -7,6 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 import base64
+import sys
+import subprocess
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,6 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Create your views here.
 # colours = []
 # Color_percent = []
+np.set_printoptions(4)
 
 
 def home(request):
@@ -28,6 +31,7 @@ def home(request):
 
         nparr = np.fromstring(imgByte, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        cv2.imwrite(str(BASE_DIR)+'/static/scene/background.png', img)
         print(img.shape)
         jpg_as_text = base64.b64encode(imgByte).decode('utf-8')
 
@@ -45,12 +49,26 @@ def home(request):
         labels = []
         sizes = []
         Colors = []
+        rgbas = []
         for color_dict in Color_percent:
             Colors.append(tuple(color_dict['color']))
+            rgbas.append(tuple(np.array(color_dict['color'] + [255.0])/255.0))
             labels.append(color_dict['label'])
-            sizes.append(color_dict['percent'])
+            sizes.append(color_dict['percent']*100)
 
-        context = {'k': k, 'path': BASE_DIR, 'img': jpg_as_text,
+        argv = [
+            str(BASE_DIR)+'/static/scene/background.png', str(rgbas)]  # , '[(0.1,0,0,1);(0,0.2,0,1);(0,0,0.3,1);(0.1,0.2,0,1);(0.5,0,0.5,1)]'
+        subprocess.run(["blender", "-b", 'static/scene/Background_camoublend_withPython.blend',
+                       "-x", "1", "-o", "//rendered", "-a", '--', ] + argv)
+        img_camo = cv2.imread(str(BASE_DIR)+'/static/scene/rendered0001.png')
+        retval, buffer = cv2.imencode('.png', img_camo)
+        img_camo_as_text = base64.b64encode(buffer).decode('utf-8')
+
+        soldier_camo = cv2.imread(
+            str(BASE_DIR)+'/static/scene/rendered0002.png')
+        retval, buffer = cv2.imencode('.png', soldier_camo)
+        soldier_camo_as_text = base64.b64encode(buffer).decode('utf-8')
+        context = {'k': k, 'path': BASE_DIR, 'img': jpg_as_text, 'img_camo': img_camo_as_text, 'soldier_camo': soldier_camo_as_text,
                    'Colors': Colors, 'labels': labels, 'sizes': sizes}
         return render(request, 'base/home.html', context=context)
     return render(request, 'base/home.html', context=context)

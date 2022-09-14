@@ -8,6 +8,25 @@
           <canvas id="myChart"></canvas>
         </div>
         <hr />
+
+        <img
+          class="img-fluid"
+          src="data:image/png;base64, {{img_camo}}"
+          style="height: 180px"
+        />
+
+        <img
+          class="img-fluid"
+          src="data:image/png;base64, {{soldier_camo}}"
+          style="height: 180px"
+        />
+
+        <img
+          class="img-fluid"
+          src="data:image/png;base64, {{img}}"
+          style="height: 180px"
+        />
+
         {%endif%}
       </div>
       <div class="col-md-6 col-xl-4">
@@ -53,11 +72,14 @@
           </form>
           {%if request.method == "POST"%}
           <hr />
-          <img
-            class="img-fluid"
-            src="data:image/png;base64, {{img}}"
-            width="300"
-          />
+          <ul id="sortable">
+            {% for Color in Colors %}
+            <li class="ui-state-default">
+              {{Color}}
+              <span style="background-color: rgb{{Color}}">&nbsp;.....</span>
+            </li>
+            {% endfor %}
+          </ul>
           {%endif%}
         </div>
       </div>
@@ -71,28 +93,46 @@
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
 {%if request.method == "POST"%}
 <script>
 
-  const ctx = document.getElementById('myChart');
+    const ctx = document.getElementById('myChart');
 
-  const data = {
-    labels: {{labels}},
-    datasets: [{
-      label: 'Area occupied',
-      data: {{sizes}},
-      backgroundColor: [
-      {% for Color in Colors %}
-      "rgb{{Color}}",
-      {% endfor %}
-      ],
-      hoverOffset: 4
-    }]
-  };
-  const config = {
-    type: 'pie',
-    data: data,
-  };
-  const myChart = new Chart(ctx, config);
+    const data = {
+      labels: {{labels}},
+      datasets: [{
+        label: 'Area occupied',
+        data: {{sizes}},
+        backgroundColor: [
+        {% for Color in Colors %}
+        "rgb{{Color}}",
+        {% endfor %}
+        ],
+        hoverOffset: 4
+      }]
+    };
+    const config = {
+      type: 'pie',
+      data: data,
+    };
+    const myChart = new Chart(ctx, config);
+
+  ///////////////
+
+  $( function() {
+    $( "#sortable" ).sortable({
+      revert: true
+    });
+    $( "#draggable" ).draggable({
+      connectToSortable: "#sortable",
+      helper: "clone",
+      revert: "invalid"
+    });
+    $( "ul, li" ).disableSelection();
+  } );
 </script>
 {%endif%} {% endblock content %}
